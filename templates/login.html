@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In — Smart Health{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Reset main wrapper styles specifically for auth pages (no sidebar) */
+    body {
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at center, #0e2042 0%, #060a12 100%);
+    }
+    
+    .main-wrapper {
+        margin-left: 0 !important;
+        padding: 20px !important;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 480px;
+        min-height: auto !important;
+    }
+    
+    .auth-card {
+        width: 100%;
+        padding: 40px;
+        text-align: center;
+    }
+    
+    .auth-logo {
+        width: 64px;
+        height: 64px;
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        color: var(--color-primary);
+        text-shadow: 0 0 15px var(--color-primary-glow);
+        margin-bottom: 20px;
+    }
+    
+    .auth-title {
+        font-family: var(--font-outfit);
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+    }
+    
+    .auth-subtitle {
+        color: var(--text-secondary);
+        font-size: 14px;
+        margin-bottom: 30px;
+    }
+    
+    .form-group {
+        text-align: left;
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+        padding-left: 4px;
+    }
+    
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 16px;
+        color: var(--text-secondary);
+        font-size: 16px;
+        pointer-events: none;
+        transition: color 0.3s;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 14px 16px 14px 46px;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 14px;
+        font-family: var(--font-inter);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .form-input:focus {
+        outline: none;
+        background: rgba(15, 23, 42, 0.7);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
+    
+    .form-input:focus + .input-icon {
+        color: var(--color-primary);
+    }
+    
+    .auth-btn {
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-size: 15px;
+    }
+    
+    .auth-footer {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+    
+    .auth-footer a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    
+    .auth-footer a:hover {
+        color: #60a5fa;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card glass-panel">
+    <div class="auth-logo">
+        <i class="fa-solid fa-lock"></i>
+    </div>
+    <h2 class="auth-title">Welcome Back</h2>
+    <p class="auth-subtitle">Diagnostic assessments at your fingertips.</p>
+    
+    <form action="{{ url_for('login') }}" method="POST">
+        <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <div class="input-wrapper">
+                <input class="form-input" type="text" id="username" name="username" placeholder="Enter username" required autocomplete="username">
+                <i class="fa-solid fa-user input-icon"></i>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div class="input-wrapper">
+                <input class="form-input" type="password" id="password" name="password" placeholder="Enter password" required autocomplete="current-password">
+                <i class="fa-solid fa-key input-icon"></i>
+            </div>
+        </div>
+        
+        <button class="btn-action btn-primary auth-btn" type="submit">
+            <span>Access Portal</span>
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        </button>
+    </form>
+    
+    <div class="auth-footer">
+        <span>Don't have an account?</span>
+        <a href="{{ url_for('signup') }}">Sign Up Now</a>
+    </div>
+</div>
+{% endblock %}

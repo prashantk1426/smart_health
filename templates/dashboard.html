@@ -1,0 +1,347 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard — Smart Health{% endblock %}
+
+{% block header_title %}Clinical Dashboard{% endblock %}
+{% block header_subtitle %}Overview of patient stats, medical history, and clinical parameters.{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ── DASHBOARD GRID LAYOUT ── */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 20px;
+    }
+    
+    .stat-card {
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+    }
+    
+    .stat-card.total .stat-icon {
+        background: rgba(59, 130, 246, 0.15);
+        color: var(--color-primary);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    
+    .stat-card.positive .stat-icon {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--color-danger);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    
+    .stat-card.negative .stat-icon {
+        background: rgba(16, 185, 129, 0.15);
+        color: var(--color-success);
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    
+    .stat-card.types .stat-icon {
+        background: rgba(245, 158, 11, 0.15);
+        color: var(--color-warning);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+    
+    .stat-info {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .stat-value {
+        font-family: var(--font-outfit);
+        font-weight: 800;
+        font-size: 26px;
+        color: var(--text-primary);
+    }
+    
+    .stat-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* ── DASHBOARD BLOCKS ── */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 24px;
+    }
+    
+    @media (max-width: 992px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .panel-title {
+        font-family: var(--font-outfit);
+        font-weight: 700;
+        font-size: 18px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .panel-title i {
+        color: var(--color-primary);
+    }
+    
+    /* ── PREDICTIONS GRID ACTIONS ── */
+    .disease-actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    
+    .disease-card {
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+    }
+    
+    .disease-card i {
+        font-size: 28px;
+        transition: transform 0.3s;
+    }
+    
+    .disease-card:hover i {
+        transform: scale(1.15);
+    }
+    
+    .disease-card.diabetes i { color: #60a5fa; }
+    .disease-card.heart i { color: #ef4444; }
+    .disease-card.kidney i { color: #f59e0b; }
+    .disease-card.liver i { color: #10b981; }
+    
+    .disease-card-title {
+        font-family: var(--font-outfit);
+        font-weight: 700;
+        font-size: 14px;
+        color: var(--text-primary);
+    }
+    
+    .disease-card-desc {
+        font-size: 11px;
+        color: var(--text-secondary);
+    }
+    
+    /* ── TABLE STYLING ── */
+    .history-table-container {
+        width: 100%;
+        overflow-x: auto;
+    }
+    
+    .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    
+    .custom-table th {
+        padding: 14px 16px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .custom-table td {
+        padding: 14px 16px;
+        font-size: 13px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+    
+    .custom-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .badge-result {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    
+    .badge-result.positive {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    
+    .badge-result.negative {
+        background: rgba(16, 185, 129, 0.15);
+        color: #a7f3d0;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    
+    .chart-panel {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+    }
+    
+    .chart-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 1. Stats Counter Row -->
+<section class="stats-container">
+    <div class="stat-card total glass-panel">
+        <div class="stat-icon"><i class="fa-solid fa-file-medical"></i></div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.total }}</span>
+            <span class="stat-label">Total Tests</span>
+        </div>
+    </div>
+    
+    <div class="stat-card positive glass-panel">
+        <div class="stat-icon"><i class="fa-solid fa-heart-crack"></i></div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.positive }}</span>
+            <span class="stat-label">High Risk Cases</span>
+        </div>
+    </div>
+    
+    <div class="stat-card negative glass-panel">
+        <div class="stat-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.negative }}</span>
+            <span class="stat-label">Low Risk Cases</span>
+        </div>
+    </div>
+    
+    <div class="stat-card types glass-panel">
+        <div class="stat-icon"><i class="fa-solid fa-microscope"></i></div>
+        <div class="stat-info">
+            <span class="stat-value">{{ stats.diseases }}</span>
+            <span class="stat-label">Diseases Logged</span>
+        </div>
+    </div>
+</section>
+
+<!-- 2. Main Diagnostic Panels -->
+<div class="dashboard-grid">
+    <!-- Recent Diagnostic Assessments -->
+    <div class="glass-panel" style="padding: 24px;">
+        <h3 class="panel-title"><i class="fa-solid fa-notes-medical"></i> Recent Diagnostics</h3>
+        
+        <div class="history-table-container">
+            {% if recent_predictions %}
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>Disease Pathogen</th>
+                        <th>Assessment Date</th>
+                        <th>Outcome</th>
+                        <th>Risk Score</th>
+                        <th>Report</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pred in recent_predictions %}
+                    <tr>
+                        <td style="font-weight: 600;">{{ pred.disease }}</td>
+                        <td>{{ pred.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td>
+                            <span class="badge-result {{ 'positive' if pred.result == 'Positive' else 'negative' }}">
+                                <i class="fa-solid {{ 'fa-circle-exclamation' if pred.result == 'Positive' else 'fa-circle-check' }}"></i>
+                                {{ pred.result }}
+                            </span>
+                        </td>
+                        <td style="font-family: var(--font-outfit); font-weight: 700;">{{ "%.1f"|format(pred.confidence) }}%</td>
+                        <td>
+                            <a href="{{ url_for('download_report', pred_id=pred.id) }}" class="btn-action btn-secondary" style="padding: 6px 12px; font-size: 11px; border-radius: 6px;">
+                                <i class="fa-solid fa-file-pdf"></i>
+                                <span>PDF</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div style="text-align: center; padding: 40px 0; color: var(--text-secondary);">
+                <i class="fa-solid fa-folder-open" style="font-size: 36px; margin-bottom: 12px; opacity: 0.5;"></i>
+                <p style="font-size: 14px;">No diagnostic assessments run yet.</p>
+                <a href="{{ url_for('predict', disease='diabetes') }}" class="btn-action btn-primary" style="margin-top: 15px; padding: 8px 16px;">Run First Test</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Actions Grid -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+        <div class="glass-panel" style="padding: 24px;">
+            <h3 class="panel-title"><i class="fa-solid fa-stethoscope"></i> Diagnostic Actions</h3>
+            <div class="disease-actions-grid">
+                <a href="{{ url_for('predict', disease='diabetes') }}" class="glass-card disease-card diabetes">
+                    <i class="fa-solid fa-droplet"></i>
+                    <span class="disease-card-title">Diabetes</span>
+                    <span class="disease-card-desc">Endocrine assay</span>
+                </a>
+                <a href="{{ url_for('predict', disease='heart') }}" class="glass-card disease-card heart">
+                    <i class="fa-solid fa-heart"></i>
+                    <span class="disease-card-title">Heart Disease</span>
+                    <span class="disease-card-desc">Cardio wellness</span>
+                </a>
+                <a href="{{ url_for('predict', disease='kidney') }}" class="glass-card disease-card kidney">
+                    <i class="fa-solid fa-dna"></i>
+                    <span class="disease-card-title">Kidney Disease</span>
+                    <span class="disease-card-desc">Renal assay</span>
+                </a>
+                <a href="{{ url_for('predict', disease='liver') }}" class="glass-card disease-card liver">
+                    <i class="fa-solid fa-shield-virus"></i>
+                    <span class="disease-card-title">Liver Disease</span>
+                    <span class="disease-card-desc">Hepatic assay</span>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Matplotlib Chart Panel -->
+        {% if chart_b64 %}
+        <div class="glass-panel chart-panel" style="padding: 24px; flex-direction: column; align-items: stretch;">
+            <h3 class="panel-title" style="margin-bottom: 12px;"><i class="fa-solid fa-chart-line"></i> History Distribution</h3>
+            <div class="chart-panel">
+                <img class="chart-img" src="data:image/png;base64,{{ chart_b64 }}" alt="Diagnostic History Chart">
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

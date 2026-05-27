@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up — Smart Health{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Reset main wrapper styles specifically for auth pages (no sidebar) */
+    body {
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at center, #0e2042 0%, #060a12 100%);
+    }
+    
+    .main-wrapper {
+        margin-left: 0 !important;
+        padding: 20px !important;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        max-width: 520px;
+        min-height: auto !important;
+        margin-top: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .auth-card {
+        width: 100%;
+        padding: 35px;
+        text-align: center;
+    }
+    
+    .auth-logo {
+        width: 60px;
+        height: 60px;
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        color: var(--color-primary);
+        text-shadow: 0 0 15px var(--color-primary-glow);
+        margin-bottom: 15px;
+    }
+    
+    .auth-title {
+        font-family: var(--font-outfit);
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 6px;
+        color: var(--text-primary);
+    }
+    
+    .auth-subtitle {
+        color: var(--text-secondary);
+        font-size: 14px;
+        margin-bottom: 25px;
+    }
+    
+    .form-group {
+        text-align: left;
+        margin-bottom: 16px;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        margin-bottom: 6px;
+        padding-left: 4px;
+    }
+    
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .input-icon {
+        position: absolute;
+        left: 16px;
+        color: var(--text-secondary);
+        font-size: 15px;
+        pointer-events: none;
+        transition: color 0.3s;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 12px 16px 12px 44px;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        color: var(--text-primary);
+        font-size: 14px;
+        font-family: var(--font-inter);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .form-input:focus {
+        outline: none;
+        background: rgba(15, 23, 42, 0.7);
+        border-color: var(--color-primary);
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+    }
+    
+    .form-input:focus + .input-icon {
+        color: var(--color-primary);
+    }
+    
+    select.form-input {
+        appearance: none;
+        -webkit-appearance: none;
+        cursor: pointer;
+    }
+    
+    .select-arrow {
+        position: absolute;
+        right: 16px;
+        color: var(--text-secondary);
+        pointer-events: none;
+        font-size: 12px;
+    }
+    
+    .auth-btn {
+        width: 100%;
+        padding: 14px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        font-size: 15px;
+    }
+    
+    .auth-footer {
+        font-size: 13px;
+        color: var(--text-secondary);
+    }
+    
+    .auth-footer a {
+        color: var(--color-primary);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    
+    .auth-footer a:hover {
+        color: #60a5fa;
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-card glass-panel">
+    <div class="auth-logo">
+        <i class="fa-solid fa-user-plus"></i>
+    </div>
+    <h2 class="auth-title">Create Account</h2>
+    <p class="auth-subtitle">Diagnostic assessments and patient portal.</p>
+    
+    <form action="{{ url_for('signup') }}" method="POST">
+        <div class="form-group">
+            <label class="form-label" for="full_name">Full Name</label>
+            <div class="input-wrapper">
+                <input class="form-input" type="text" id="full_name" name="full_name" placeholder="John Doe" required autocomplete="name">
+                <i class="fa-solid fa-id-card input-icon"></i>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="username">Username</label>
+                <div class="input-wrapper">
+                    <input class="form-input" type="text" id="username" name="username" placeholder="johndoe" required autocomplete="username">
+                    <i class="fa-solid fa-user input-icon"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="email">Email Address</label>
+                <div class="input-wrapper">
+                    <input class="form-input" type="email" id="email" name="email" placeholder="john@example.com" required autocomplete="email">
+                    <i class="fa-solid fa-envelope input-icon"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="age">Age (years)</label>
+                <div class="input-wrapper">
+                    <input class="form-input" type="number" id="age" name="age" min="1" max="120" placeholder="25" required>
+                    <i class="fa-solid fa-calendar input-icon"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="gender">Gender</label>
+                <div class="input-wrapper">
+                    <select class="form-input" id="gender" name="gender" required>
+                        <option value="" disabled selected>Select gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                    <i class="fa-solid fa-venus-mars input-icon"></i>
+                    <i class="fa-solid fa-chevron-down select-arrow"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <div class="input-wrapper">
+                    <input class="form-input" type="password" id="password" name="password" placeholder="At least 6 chars" required autocomplete="new-password">
+                    <i class="fa-solid fa-key input-icon"></i>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="confirm_password">Confirm Password</label>
+                <div class="input-wrapper">
+                    <input class="form-input" type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required autocomplete="new-password">
+                    <i class="fa-solid fa-shield-halo input-icon"></i>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn-action btn-primary auth-btn" type="submit">
+            <span>Register Account</span>
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        </button>
+    </form>
+    
+    <div class="auth-footer">
+        <span>Already have an account?</span>
+        <a href="{{ url_for('login') }}">Log In</a>
+    </div>
+</div>
+{% endblock %}

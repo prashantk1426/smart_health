@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+
+{% block title %}Diagnostic Log — Smart Health{% endblock %}
+
+{% block header_title %}Diagnostic Log{% endblock %}
+{% block header_subtitle %}Full audit trail and historical logs of all clinical risk assessments performed.{% endblock %}
+
+{% block extra_head %}
+<style>
+    .log-card {
+        padding: 30px;
+    }
+    
+    /* ── SEARCH / FILTER BAR ── */
+    .filter-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    
+    .search-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        flex: 1;
+        max-width: 320px;
+    }
+    
+    .search-input {
+        width: 100%;
+        padding: 10px 16px 10px 40px;
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 13px;
+        transition: all 0.3s;
+    }
+    
+    .search-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        background: rgba(15, 23, 42, 0.6);
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 14px;
+        color: var(--text-secondary);
+        font-size: 14px;
+    }
+    
+    /* ── HISTORY LOGS TABLE ── */
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto;
+    }
+    
+    .log-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+    
+    .log-table th {
+        padding: 16px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-secondary);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .log-table td {
+        padding: 16px;
+        font-size: 13px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        color: var(--text-primary);
+    }
+    
+    .log-table tr:hover td {
+        background: rgba(255, 255, 255, 0.01);
+    }
+    
+    .log-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .badge-result {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+    
+    .badge-result.positive {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    
+    .badge-result.negative {
+        background: rgba(16, 185, 129, 0.15);
+        color: #a7f3d0;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    
+    .badge-severity {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+    }
+    
+    .badge-severity.high {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+    
+    .badge-severity.medium {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.15);
+    }
+    
+    .badge-severity.low {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="glass-panel log-card">
+    <div class="filter-bar">
+        <h3 class="panel-title" style="margin-bottom: 0;"><i class="fa-solid fa-folder-closed"></i> All Assessments Log</h3>
+        
+        <div class="search-wrapper">
+            <input class="search-input" type="text" id="log-search" onkeyup="filterLogs()" placeholder="Search by disease name...">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        {% if predictions %}
+        <table class="log-table" id="logs-table">
+            <thead>
+                <tr>
+                    <th>Record ID</th>
+                    <th>Clinical Assay / Disease</th>
+                    <th>Assessment Date</th>
+                    <th>Outcome Result</th>
+                    <th>Risk Confidence</th>
+                    <th>Severity Scale</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pred in predictions %}
+                <tr>
+                    <td style="font-family: var(--font-outfit); color: var(--text-secondary); font-size: 12px;">CR-{{ "%06d"|format(pred.id) }}</td>
+                    <td style="font-weight: 600;">{{ pred.disease }}</td>
+                    <td>{{ pred.created_at.strftime('%Y-%m-%d %I:%M %p') }}</td>
+                    <td>
+                        <span class="badge-result {{ 'positive' if pred.result == 'Positive' else 'negative' }}">
+                            <i class="fa-solid {{ 'fa-circle-exclamation' if pred.result == 'Positive' else 'fa-circle-check' }}"></i>
+                            {{ pred.result }}
+                        </span>
+                    </td>
+                    <td style="font-family: var(--font-outfit); font-weight: 700;">{{ "%.2f"|format(pred.confidence) }}%</td>
+                    <td>
+                        <span class="badge-severity {{ pred.risk_level | lower }}">
+                            {{ pred.risk_level }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{{ url_for('download_report', pred_id=pred.id) }}" class="btn-action btn-secondary" style="padding: 6px 12px; font-size: 11px; border-radius: 6px;">
+                                <i class="fa-solid fa-file-pdf"></i>
+                                <span>PDF Report</span>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div style="text-align: center; padding: 60px 0; color: var(--text-secondary);">
+            <i class="fa-solid fa-clipboard-list" style="font-size: 40px; margin-bottom: 15px; opacity: 0.5;"></i>
+            <p style="font-size: 14px;">No diagnostic risk assessments saved in your history.</p>
+            <a href="{{ url_for('predict', disease='diabetes') }}" class="btn-action btn-primary" style="margin-top: 15px; padding: 8px 16px;">Perform Diagnostic Analysis</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function filterLogs() {
+        const input = document.getElementById("log-search");
+        const filter = input.value.toLowerCase();
+        const table = document.getElementById("logs-table");
+        if (!table) return;
+        const trs = table.getElementsByTagName("tr");
+        
+        // Loop through all table rows except the header
+        for (let i = 1; i < trs.length; i++) {
+            const tr = trs[i];
+            const tdDisease = tr.getElementsByTagName("td")[1];
+            if (tdDisease) {
+                const textVal = tdDisease.textContent || tdDisease.innerText;
+                if (textVal.toLowerCase().indexOf(filter) > -1) {
+                    tr.style.display = "";
+                } else {
+                    tr.style.display = "none";
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

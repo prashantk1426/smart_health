@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Smart Health Prediction System{% endblock %}</title>
+    
+    <!-- Outfit & Inter Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-base: #070d19;
+            --bg-accent: #0f1c3f;
+            --glass-bg: rgba(15, 23, 42, 0.45);
+            --glass-bg-hover: rgba(30, 41, 59, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-border-glow: rgba(59, 130, 246, 0.3);
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --color-primary: #3b82f6;
+            --color-primary-glow: rgba(59, 130, 246, 0.35);
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --font-outfit: 'Outfit', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+            --sidebar-width: 260px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: radial-gradient(circle at 10% 20%, #0d1e3d 0%, var(--bg-base) 90%);
+            color: var(--text-primary);
+            font-family: var(--font-inter);
+            min-height: 100vh;
+            display: flex;
+            overflow-x: hidden;
+        }
+
+        /* ── GLASS CONTAINER UTILITIES ── */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px) saturate(120%);
+            -webkit-backdrop-filter: blur(16px) saturate(120%);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-panel:hover {
+            border-color: var(--glass-border-glow);
+            box-shadow: 0 8px 32px 0 rgba(59, 130, 246, 0.15);
+        }
+
+        .glass-card {
+            background: rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-card:hover {
+            background: rgba(15, 23, 42, 0.55);
+            border-color: rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* ── SIDEBAR NAVIGATION ── */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 0 24px 24px 0;
+            border-left: none;
+            border-top: none;
+            border-bottom: none;
+            background: rgba(7, 13, 25, 0.7);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding-left: 8px;
+        }
+
+        .brand-logo {
+            font-size: 24px;
+            color: var(--color-primary);
+            text-shadow: 0 0 12px var(--color-primary-glow);
+        }
+
+        .brand-text {
+            font-family: var(--font-outfit);
+            font-weight: 800;
+            font-size: 20px;
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #ffffff 30%, #60a5fa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            list-style: none;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 14px;
+            border-radius: 12px;
+            transition: all 0.25s ease;
+        }
+
+        .nav-item a:hover, .nav-item.active a {
+            color: var(--text-primary);
+            background: rgba(59, 130, 246, 0.15);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+        }
+
+        .nav-item.active a i {
+            color: var(--color-primary);
+            text-shadow: 0 0 8px var(--color-primary-glow);
+        }
+
+        .nav-section-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(148, 163, 184, 0.4);
+            margin: 20px 0 8px 16px;
+            font-weight: 700;
+        }
+
+        .user-profile-badge {
+            margin-top: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: rgba(15, 23, 42, 0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-outfit);
+            font-weight: 700;
+            color: white;
+            font-size: 14px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .user-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .user-role {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* ── MAIN CONTENT AREA ── */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .page-header h1 {
+            font-family: var(--font-outfit);
+            font-weight: 700;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* ── ALERT NOTIFICATIONS ── */
+        .alerts-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 350px;
+        }
+
+        .alert-banner {
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: slideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .alert-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .alert-banner.alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--color-success);
+            border-right: 1px solid rgba(16, 185, 129, 0.1);
+            border-top: 1px solid rgba(16, 185, 129, 0.1);
+            border-bottom: 1px solid rgba(16, 185, 129, 0.1);
+            color: #d1fae5;
+        }
+
+        .alert-banner.alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: var(--color-danger);
+            border-right: 1px solid rgba(239, 68, 68, 0.1);
+            border-top: 1px solid rgba(239, 68, 68, 0.1);
+            border-bottom: 1px solid rgba(239, 68, 68, 0.1);
+            color: #fee2e2;
+        }
+
+        .alert-banner.alert-warning {
+            background: rgba(245, 158, 11, 0.15);
+            border-color: var(--color-warning);
+            border-right: 1px solid rgba(245, 158, 11, 0.1);
+            border-top: 1px solid rgba(245, 158, 11, 0.1);
+            border-bottom: 1px solid rgba(245, 158, 11, 0.1);
+            color: #fef3c7;
+        }
+
+        .alert-banner.alert-info {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: var(--color-primary);
+            border-right: 1px solid rgba(59, 130, 246, 0.1);
+            border-top: 1px solid rgba(59, 130, 246, 0.1);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+            color: #dbeafe;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 14px;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .alert-close:hover {
+            color: var(--text-primary);
+        }
+
+        /* ── BUTTON UTILITIES ── */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+            border: none;
+            font-family: var(--font-outfit);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary) 0%, #1d4ed8 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: rgba(30, 41, 59, 0.5);
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(30, 41, 59, 0.8);
+            border-color: var(--glass-border-glow);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px) translateY(0);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar {
+                width: 70px;
+                padding: 20px 10px;
+            }
+            .brand-text, .nav-item span, .user-info, .nav-section-title {
+                display: none;
+            }
+            .brand {
+                justify-content: center;
+                padding-left: 0;
+            }
+            .sidebar .nav-item a {
+                justify-content: center;
+                padding: 12px;
+            }
+            .main-wrapper {
+                margin-left: 70px;
+                padding: 24px;
+            }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Sidebar -->
+    {% if current_user.is_authenticated %}
+    <aside class="sidebar glass-panel">
+        <div class="brand">
+            <i class="fa-solid fa-heart-pulse brand-logo"></i>
+            <span class="brand-text">SmartHealth</span>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item {% if request.path == '/dashboard' %}active{% endif %}">
+                <a href="{{ url_for('dashboard') }}">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            
+            <div class="nav-section-title">Diagnostics</div>
+            <li class="nav-item {% if 'diabetes' in request.path %}active{% endif %}">
+                <a href="{{ url_for('predict', disease='diabetes') }}">
+                    <i class="fa-solid fa-droplet"></i>
+                    <span>Diabetes Risk</span>
+                </a>
+            </li>
+            <li class="nav-item {% if 'heart' in request.path %}active{% endif %}">
+                <a href="{{ url_for('predict', disease='heart') }}">
+                    <i class="fa-solid fa-heart"></i>
+                    <span>Heart Risk</span>
+                </a>
+            </li>
+            <li class="nav-item {% if 'kidney' in request.path %}active{% endif %}">
+                <a href="{{ url_for('predict', disease='kidney') }}">
+                    <i class="fa-solid fa-kidney"></i> <!-- Using fa-solid fallback -->
+                    <i class="fa-solid fa-dna" style="display:none"></i> <!-- fallback if custom doesn't load -->
+                    <span>Kidney Risk</span>
+                </a>
+            </li>
+            <li class="nav-item {% if 'liver' in request.path %}active{% endif %}">
+                <a href="{{ url_for('predict', disease='liver') }}">
+                    <i class="fa-solid fa-shield-virus"></i>
+                    <span>Liver Risk</span>
+                </a>
+            </li>
+
+            <div class="nav-section-title">Logistics</div>
+            <li class="nav-item {% if request.path == '/tools' %}active{% endif %}">
+                <a href="{{ url_for('tools') }}">
+                    <i class="fa-solid fa-screwdriver-wrench"></i>
+                    <span>Clinical Tools</span>
+                </a>
+            </li>
+            <li class="nav-item {% if request.path == '/history' %}active{% endif %}">
+                <a href="{{ url_for('history') }}">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Diagnostic Log</span>
+                </a>
+            </li>
+            <li class="nav-item {% if request.path == '/profile' %}active{% endif %}">
+                <a href="{{ url_for('profile') }}">
+                    <i class="fa-solid fa-circle-user"></i>
+                    <span>Profile Info</span>
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: 15px;">
+                <a href="{{ url_for('logout') }}" style="color: var(--color-danger);">
+                    <i class="fa-solid fa-power-off"></i>
+                    <span>Log Out</span>
+                </a>
+            </li>
+        </ul>
+
+        <div class="user-profile-badge">
+            <div class="user-avatar">
+                {{ current_user.full_name[0] | upper if current_user.full_name else 'U' }}
+            </div>
+            <div class="user-info">
+                <span class="user-name">{{ current_user.full_name }}</span>
+                <span class="user-role">Patient account</span>
+            </div>
+        </div>
+    </aside>
+    {% endif %}
+
+    <!-- Alerts Notification Center -->
+    <div class="alerts-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert-banner alert-{{ category if category != 'error' else 'danger' }}">
+                        <div class="alert-content">
+                            {% if category == 'success' %}
+                                <i class="fa-solid fa-circle-check"></i>
+                            {% elif category == 'danger' or category == 'error' %}
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                            {% else %}
+                                <i class="fa-solid fa-circle-info"></i>
+                            {% endif %}
+                            <span>{{ message }}</span>
+                        </div>
+                        <button class="alert-close" onclick="this.parentElement.remove()">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Main Wrapper -->
+    <main class="main-wrapper">
+        {% if current_user.is_authenticated %}
+        <header class="top-navbar">
+            <div class="page-header">
+                <h1>{% block header_title %}Welcome Back{% endblock %}</h1>
+                <p>{% block header_subtitle %}Overview of your diagnostics and wellness metrics.{% endblock %}</p>
+            </div>
+            <div>
+                <!-- Extra topnav elements like datetime -->
+                <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500; background: rgba(15,23,42,0.3); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05)">
+                    <i class="fa-regular fa-calendar-days" style="margin-right: 6px;"></i>
+                    <span id="current-date"></span>
+                </span>
+            </div>
+        </header>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Simple current date display
+        const dateEl = document.getElementById('current-date');
+        if (dateEl) {
+            const options = { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' };
+            dateEl.textContent = new Date().toLocaleDateString('en-US', options);
+        }
+        
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert-banner');
+            alerts.forEach(alert => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateX(100px)';
+                alert.style.transition = 'all 0.5s ease';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    </script>
+</body>
+</html>

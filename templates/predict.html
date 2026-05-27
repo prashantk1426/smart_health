@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ meta.title }} — Smart Health{% endblock %}
+
+{% block header_title %}{{ meta.title }}{% endblock %}
+{% block header_subtitle %}Input patient clinical data parameters to perform machine learning diagnostic risk analysis.{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ── PAGE LAYOUT ── */
+    .predict-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    @media (min-width: 992px) {
+        .predict-grid.has-result {
+            grid-template-columns: 1.1fr 0.9fr;
+        }
+    }
+    
+    .diagnostic-form-card {
+        padding: 30px;
+    }
+    
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    @media (min-width: 600px) {
+        .form-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    
+    /* ── INPUT FIELDS ── */
+    .field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .field-label-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 4px;
+    }
+    
+    .field-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .field-info-icon {
+        color: var(--text-secondary);
+        font-size: 13px;
+        cursor: help;
+        position: relative;
+        transition: color 0.2s;
+    }
+    
+    .field-info-icon:hover {
+        color: var(--color-primary);
+    }
+    
+    /* Tooltip styling */
+    .field-info-icon .tooltip-text {
+        visibility: hidden;
+        width: 200px;
+        background-color: #0f1c3f;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        color: #fff;
+        text-align: center;
+        border-radius: 6px;
+        padding: 8px;
+        position: absolute;
+        z-index: 10;
+        bottom: 125%;
+        left: 50%;
+        margin-left: -100px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        font-size: 11px;
+        font-family: var(--font-inter);
+        line-height: 14px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    
+    .field-info-icon:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+    }
+    
+    .input-unit-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+    
+    .field-input {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-family: var(--font-inter);
+        font-size: 14px;
+        transition: all 0.3s;
+    }
+    
+    .field-input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+        background: rgba(15, 23, 42, 0.6);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+    
+    .input-unit {
+        position: absolute;
+        right: 16px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-secondary);
+        pointer-events: none;
+    }
+    
+    .field-input-has-unit {
+        padding-right: 65px;
+    }
+    
+    .form-btn-row {
+        grid-column: 1 / -1;
+        margin-top: 15px;
+        display: flex;
+        gap: 15px;
+    }
+    
+    .btn-submit-diag {
+        flex: 1;
+        padding: 14px;
+        font-size: 15px;
+    }
+    
+    /* ── DIAGNOSTIC OUTCOME CARD ── */
+    .outcome-card {
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+        text-align: center;
+        position: relative;
+    }
+    
+    .outcome-title {
+        font-family: var(--font-outfit);
+        font-weight: 800;
+        font-size: 22px;
+        letter-spacing: -0.5px;
+    }
+    
+    .outcome-card.positive {
+        border-color: rgba(239, 68, 68, 0.25);
+    }
+    .outcome-card.negative {
+        border-color: rgba(16, 185, 129, 0.25);
+    }
+    
+    .gauge-wrapper {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+    
+    .gauge-img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .risk-badge-large {
+        font-family: var(--font-outfit);
+        font-weight: 800;
+        font-size: 15px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 8px 24px;
+        border-radius: 30px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .risk-badge-large.high {
+        background: rgba(239, 68, 68, 0.15);
+        color: #fca5a5;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+    }
+    
+    .risk-badge-large.medium {
+        background: rgba(245, 158, 11, 0.15);
+        color: #fcd34d;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        box-shadow: 0 0 15px rgba(245, 158, 11, 0.15);
+    }
+    
+    .risk-badge-large.low {
+        background: rgba(16, 185, 129, 0.15);
+        color: #a7f3d0;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+    }
+    
+    .suggestions-panel {
+        width: 100%;
+        text-align: left;
+    }
+    
+    .suggestions-title {
+        font-family: var(--font-outfit);
+        font-weight: 700;
+        font-size: 14px;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        letter-spacing: 0.5px;
+        margin-bottom: 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        padding-bottom: 6px;
+    }
+    
+    .suggestions-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .suggestion-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        font-size: 13px;
+        line-height: 18px;
+        color: var(--text-primary);
+    }
+    
+    .suggestion-item i {
+        margin-top: 2px;
+    }
+    
+    .positive .suggestion-item i { color: #f87171; }
+    .negative .suggestion-item i { color: #34d399; }
+    
+    .download-report-btn {
+        width: 100%;
+        padding: 12px;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="predict-grid {% if result %}has-result{% endif %}">
+    
+    <!-- Left Column: Diagnostic Inputs Form -->
+    <div class="glass-panel diagnostic-form-card">
+        <h3 class="panel-title"><i class="fa-solid fa-square-poll-horizontal"></i> Diagnostic Metrics</h3>
+        
+        <form action="{{ url_for('predict', disease=disease) }}" method="POST">
+            <div class="form-grid">
+                {% for field in meta.fields %}
+                <div class="field-group">
+                    <div class="field-label-row">
+                        <label class="field-title" for="{{ field.name }}">{{ field.label }}</label>
+                        {% if field.info %}
+                        <span class="field-info-icon">
+                            <i class="fa-solid fa-circle-info"></i>
+                            <span class="tooltip-text">{{ field.info }}</span>
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="input-unit-wrapper">
+                        <input class="field-input {% if field.unit %}field-input-has-unit{% endif %}"
+                               type="number"
+                               id="{{ field.name }}"
+                               name="{{ field.name }}"
+                               min="{{ field.min }}"
+                               max="{{ field.max }}"
+                               step="{{ field.step }}"
+                               placeholder="Min: {{ field.min }} - Max: {{ field.max }}"
+                               required>
+                        {% if field.unit %}
+                        <span class="input-unit">{{ field.unit }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <div class="form-btn-row">
+                    <button class="btn-action btn-primary btn-submit-diag" type="submit">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Analyze Clinical Biomarkers</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Right Column: Diagnostic Outcome Panel (if result is populated) -->
+    {% if result %}
+    <div class="glass-panel outcome-card {{ 'positive' if result.positive else 'negative' }}">
+        <h3 class="outcome-title">
+            {% if result.positive %}
+            Positive Risk Indicators
+            {% else %}
+            Negative Risk Indicators
+            {% endif %}
+        </h3>
+        
+        <!-- Risk severity level badge -->
+        {% if result.risk == "High" %}
+        <span class="risk-badge-large high">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{ result.risk }} Severity Risk</span>
+        </span>
+        {% elif result.risk == "Medium" %}
+        <span class="risk-badge-large medium">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>{{ result.risk }} Severity Risk</span>
+        </span>
+        {% else %}
+        <span class="risk-badge-large low">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>{{ result.risk }} Severity Risk</span>
+        </span>
+        {% endif %}
+        
+        <!-- Chart Gauge Gauge -->
+        <div class="gauge-wrapper">
+            <img class="gauge-img" src="data:image/png;base64,{{ result.chart_b64 }}" alt="Risk Confidence Bar">
+        </div>
+        
+        <!-- Recommendation suggestions list -->
+        <div class="suggestions-panel">
+            <h4 class="suggestions-title">Personalized Wellness Actions</h4>
+            <ul class="suggestions-list">
+                {% for sug in result.suggestions %}
+                <li class="suggestion-item">
+                    <i class="fa-solid {{ 'fa-circle-xmark' if result.positive else 'fa-circle-check' }}"></i>
+                    <span>{{ sug }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <!-- Action buttons -->
+        <div style="width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 10px;">
+            <a href="{{ url_for('download_report', pred_id=result.pred_id) }}" class="btn-action btn-primary download-report-btn">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Download Assessment Report (PDF)</span>
+            </a>
+            <a href="{{ url_for('predict', disease=disease) }}" class="btn-action btn-secondary" style="width: 100%;">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Reset Diagnostic Assessment</span>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile — Smart Health{% endblock %}
+
+{% block header_title %}My Profile{% endblock %}
+{% block header_subtitle %}View patient account details, registration credentials, and diagnostic stats summary.{% endblock %}
+
+{% block extra_head %}
+<style>
+    .profile-layout {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+    
+    @media (min-width: 768px) {
+        .profile-layout {
+            grid-template-columns: 0.8fr 1.2fr;
+        }
+    }
+    
+    .profile-card {
+        padding: 30px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .profile-avatar-large {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(135deg, var(--color-primary) 0%, #1e3a8a 100%);
+        border: 2px solid rgba(255,255,255,0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-outfit);
+        font-weight: 800;
+        color: white;
+        font-size: 36px;
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.35);
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .profile-info-name {
+        font-family: var(--font-outfit);
+        font-weight: 800;
+        font-size: 20px;
+        color: var(--text-primary);
+    }
+    
+    .profile-info-role {
+        font-size: 13px;
+        color: var(--text-secondary);
+        background: rgba(15,23,42,0.4);
+        padding: 4px 12px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    /* ── PROFILE DETAILS LIST ── */
+    .details-card {
+        padding: 30px;
+    }
+    
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    @media (min-width: 600px) {
+        .details-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+    
+    .detail-item {
+        background: rgba(15,23,42,0.3);
+        border: 1px solid rgba(255,255,255,0.04);
+        padding: 16px;
+        border-radius: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .detail-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        letter-spacing: 0.5px;
+    }
+    
+    .detail-val {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-layout">
+    
+    <!-- Left Column: Quick Profile Card -->
+    <div class="glass-panel profile-card">
+        <div class="profile-avatar-large">
+            {{ current_user.full_name[0] | upper if current_user.full_name else 'U' }}
+        </div>
+        <div>
+            <h3 class="profile-info-name">{{ current_user.full_name }}</h3>
+            <span class="profile-info-role"><i class="fa-solid fa-shield-halved" style="margin-right: 6px;"></i>Verified Account</span>
+        </div>
+        
+        <div style="border-top: 1px solid rgba(255,255,255,0.05); width: 100%; margin-top: 10px; padding-top: 20px; display: flex; flex-direction: column; gap: 8px; text-align: left; font-size: 13px; color: var(--text-secondary);">
+            <div><i class="fa-regular fa-clock" style="margin-right: 8px; width: 16px;"></i>Registered: {{ current_user.created_at.strftime('%Y-%m-%d') if current_user.created_at else 'N/A' }}</div>
+            <div><i class="fa-solid fa-server" style="margin-right: 8px; width: 16px;"></i>Data Node: SQLite3 (Secured)</div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Details list -->
+    <div class="glass-panel details-card">
+        <h3 class="panel-title" style="margin-bottom: 24px;"><i class="fa-solid fa-address-card"></i> Account Credentials & Demographics</h3>
+        
+        <div class="details-grid">
+            <div class="detail-item">
+                <span class="detail-label">Patient Full Name</span>
+                <span class="detail-val">{{ current_user.full_name }}</span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">Username Account</span>
+                <span class="detail-val">@{{ current_user.username }}</span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">Email Address</span>
+                <span class="detail-val">{{ current_user.email }}</span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">Reported Age</span>
+                <span class="detail-val">{{ current_user.age or 'Not Provided' }} Years old</span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">Biological Gender</span>
+                <span class="detail-val">{{ current_user.gender or 'Not Provided' }}</span>
+            </div>
+            
+            <div class="detail-item">
+                <span class="detail-label">System Access Tier</span>
+                <span class="detail-val" style="color: var(--color-primary);">Full Diagnostic Access</span>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+{% if chart_b64 %}
+<div class="glass-panel" style="padding: 30px; margin-top: 24px; display: flex; flex-direction: column; align-items: center;">
+    <h3 class="panel-title" style="align-self: flex-start; margin-bottom: 20px;"><i class="fa-solid fa-chart-line"></i> Diagnostic Distribution Overview</h3>
+    <img src="data:image/png;base64,{{ chart_b64 }}" alt="Diagnostic History Distribution" style="max-width: 100%; height: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+</div>
+{% endif %}
+{% endblock %}
